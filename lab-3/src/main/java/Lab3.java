@@ -3,18 +3,18 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
 import java.nio.FloatBuffer;
+import java.util.Objects;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-public class LWJGL3DemoNoGLU {
+public class Lab3 {
 
     private long window;
     private float eyeX = 0, eyeY = 0, eyeZ = 5;
-    private float centerX = 0, centerY = 0, centerZ = 0;
-    private boolean perspective = true; // true - перспективна, false - ортографічна
+    private boolean perspective = true;
 
     public void run() {
         init();
@@ -22,7 +22,7 @@ public class LWJGL3DemoNoGLU {
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);
         glfwTerminate();
-        glfwSetErrorCallback(null).free();
+        Objects.requireNonNull(glfwSetErrorCallback(null)).free();
     }
 
     private void init() {
@@ -58,7 +58,6 @@ public class LWJGL3DemoNoGLU {
         float aspect = (float) width / height;
 
         if (perspective) {
-            // Перспективна проекція
             float fov = 60.0f;
             float near = 0.1f, far = 100f;
             float y_scale = (float) (1f / Math.tan(Math.toRadians(fov / 2f)));
@@ -74,7 +73,6 @@ public class LWJGL3DemoNoGLU {
             }).flip();
             glLoadMatrixf(matrix);
         } else {
-            // Ортографічна проекція
             float orthoSize = 5f;
             glOrtho(-orthoSize * aspect, orthoSize * aspect, -orthoSize, orthoSize, 0.1, 100);
         }
@@ -83,22 +81,27 @@ public class LWJGL3DemoNoGLU {
     }
 
     private void lookAt(float eyeX, float eyeY, float eyeZ,
-                        float centerX, float centerY, float centerZ,
-                        float upX, float upY, float upZ) {
+                        float centerX, float centerY, float centerZ) {
 
         float[] f = {centerX - eyeX, centerY - eyeY, centerZ - eyeZ};
-        float f_mag = (float) Math.sqrt(f[0]*f[0]+f[1]*f[1]+f[2]*f[2]);
-        f[0]/=f_mag; f[1]/=f_mag; f[2]/=f_mag;
+        float f_mag = (float) Math.sqrt(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
+        f[0] /= f_mag;
+        f[1] /= f_mag;
+        f[2] /= f_mag;
 
-        float[] up = {upX, upY, upZ};
-        float up_mag = (float) Math.sqrt(up[0]*up[0]+up[1]*up[1]+up[2]*up[2]);
-        up[0]/=up_mag; up[1]/=up_mag; up[2]/=up_mag;
+        float[] up = {(float) 0, (float) 1, (float) 0};
+        float up_mag = (float) Math.sqrt(up[0] * up[0] + up[1] * up[1] + up[2] * up[2]);
+        up[0] /= up_mag;
+        up[1] /= up_mag;
+        up[2] /= up_mag;
 
-        float[] s = {f[1]*up[2]-f[2]*up[1], f[2]*up[0]-f[0]*up[2], f[0]*up[1]-f[1]*up[0]};
-        float s_mag = (float) Math.sqrt(s[0]*s[0]+s[1]*s[1]+s[2]*s[2]);
-        s[0]/=s_mag; s[1]/=s_mag; s[2]/=s_mag;
+        float[] s = {f[1] * up[2] - f[2] * up[1], f[2] * up[0] - f[0] * up[2], f[0] * up[1] - f[1] * up[0]};
+        float s_mag = (float) Math.sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2]);
+        s[0] /= s_mag;
+        s[1] /= s_mag;
+        s[2] /= s_mag;
 
-        float[] u = {s[1]*f[2]-s[2]*f[1], s[2]*f[0]-s[0]*f[2], s[0]*f[1]-s[1]*f[0]};
+        float[] u = {s[1] * f[2] - s[2] * f[1], s[2] * f[0] - s[0] * f[2], s[0] * f[1] - s[1] * f[0]};
 
         FloatBuffer m = BufferUtils.createFloatBuffer(16);
         m.put(new float[]{
@@ -116,10 +119,12 @@ public class LWJGL3DemoNoGLU {
         while (!glfwWindowShouldClose(window)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glLoadIdentity();
-            lookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, 0,1,0);
+            float centerX = 0;
+            float centerY = 0;
+            float centerZ = 0;
+            lookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ);
 
-            drawRoomCube(); // куб як кімната
-
+            drawRoomCube();
             glfwSwapBuffers(window);
             glfwPollEvents();
             processInput();
@@ -150,19 +155,41 @@ public class LWJGL3DemoNoGLU {
 
     private void drawRoomCube() {
         glBegin(GL_QUADS);
-
-        // Внутрішні грані куба (для огляду зсередини)
-        glColor3f(1f,0f,0f); glVertex3f(-5,-5,5); glVertex3f(5,-5,5); glVertex3f(5,5,5); glVertex3f(-5,5,5);
-        glColor3f(0f,1f,0f); glVertex3f(-5,-5,-5); glVertex3f(-5,5,-5); glVertex3f(5,5,-5); glVertex3f(5,-5,-5);
-        glColor3f(0f,0f,1f); glVertex3f(-5,-5,-5); glVertex3f(-5,-5,5); glVertex3f(-5,5,5); glVertex3f(-5,5,-5);
-        glColor3f(1f,1f,0f); glVertex3f(5,-5,-5); glVertex3f(5,5,-5); glVertex3f(5,5,5); glVertex3f(5,-5,5);
-        glColor3f(0f,1f,1f); glVertex3f(-5,5,-5); glVertex3f(-5,5,5); glVertex3f(5,5,5); glVertex3f(5,5,-5);
-        glColor3f(1f,0f,1f); glVertex3f(-5,-5,-5); glVertex3f(5,-5,-5); glVertex3f(5,-5,5); glVertex3f(-5,-5,5);
+        glColor3f(1f, 0f, 0f);
+        glVertex3f(-5, -5, 5);
+        glVertex3f(5, -5, 5);
+        glVertex3f(5, 5, 5);
+        glVertex3f(-5, 5, 5);
+        glColor3f(0f, 1f, 0f);
+        glVertex3f(-5, -5, -5);
+        glVertex3f(-5, 5, -5);
+        glVertex3f(5, 5, -5);
+        glVertex3f(5, -5, -5);
+        glColor3f(0f, 0f, 1f);
+        glVertex3f(-5, -5, -5);
+        glVertex3f(-5, -5, 5);
+        glVertex3f(-5, 5, 5);
+        glVertex3f(-5, 5, -5);
+        glColor3f(1f, 1f, 0f);
+        glVertex3f(5, -5, -5);
+        glVertex3f(5, 5, -5);
+        glVertex3f(5, 5, 5);
+        glVertex3f(5, -5, 5);
+        glColor3f(0f, 1f, 1f);
+        glVertex3f(-5, 5, -5);
+        glVertex3f(-5, 5, 5);
+        glVertex3f(5, 5, 5);
+        glVertex3f(5, 5, -5);
+        glColor3f(1f, 0f, 1f);
+        glVertex3f(-5, -5, -5);
+        glVertex3f(5, -5, -5);
+        glVertex3f(5, -5, 5);
+        glVertex3f(-5, -5, 5);
 
         glEnd();
     }
 
     public static void main(String[] args) {
-        new LWJGL3DemoNoGLU().run();
+        new Lab3().run();
     }
 }
