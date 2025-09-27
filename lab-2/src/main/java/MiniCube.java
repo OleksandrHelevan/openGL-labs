@@ -5,16 +5,19 @@ public class MiniCube {
     float gap;
 
     private static final float[][][] VERTICES = {
-            { {-0.5f,-0.5f, 0.5f}, {0.5f,-0.5f, 0.5f}, {0.5f,0.5f,0.5f}, {-0.5f,0.5f,0.5f} },
-            { {-0.5f,-0.5f,-0.5f}, {-0.5f,0.5f,-0.5f}, {0.5f,0.5f,-0.5f}, {0.5f,-0.5f,-0.5f} },
-            { {-0.5f,0.5f,-0.5f}, {-0.5f,0.5f,0.5f}, {0.5f,0.5f,0.5f}, {0.5f,0.5f,-0.5f} },
-            { {-0.5f,-0.5f,-0.5f}, {0.5f,-0.5f,-0.5f}, {0.5f,-0.5f,0.5f}, {-0.5f,-0.5f,0.5f} },
-            { {0.5f,-0.5f,-0.5f}, {0.5f,0.5f,-0.5f}, {0.5f,0.5f,0.5f}, {0.5f,-0.5f,0.5f} },
-            { {-0.5f,-0.5f,-0.5f}, {-0.5f,-0.5f,0.5f}, {-0.5f,0.5f,0.5f}, {-0.5f,0.5f,-0.5f} }
+            {{-0.5f, -0.5f, 0.5f}, {0.5f, -0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}, {-0.5f, 0.5f, 0.5f}},
+            {{-0.5f, -0.5f, -0.5f}, {-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, -0.5f}, {0.5f, -0.5f, -0.5f}},
+            {{-0.5f, 0.5f, -0.5f}, {-0.5f, 0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}, {0.5f, 0.5f, -0.5f}},
+            {{-0.5f, -0.5f, -0.5f}, {0.5f, -0.5f, -0.5f}, {0.5f, -0.5f, 0.5f}, {-0.5f, -0.5f, 0.5f}},
+            {{0.5f, -0.5f, -0.5f}, {0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}, {0.5f, -0.5f, 0.5f}},
+            {{-0.5f, -0.5f, -0.5f}, {-0.5f, -0.5f, 0.5f}, {-0.5f, 0.5f, 0.5f}, {-0.5f, 0.5f, -0.5f}}
     };
 
     MiniCube(float x, float y, float z, float gap) {
-        this.x = x; this.y = y; this.z = z; this.gap = gap;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.gap = gap;
     }
 
     void draw() {
@@ -30,7 +33,7 @@ public class MiniCube {
             glEnd();
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glColor3f(0,0,0);
+            glColor3f(0, 0, 0);
             glBegin(GL_QUADS);
             for (float[] v : VERTICES[i])
                 glVertex3f(v[0] * s, v[1] * s, v[2] * s);

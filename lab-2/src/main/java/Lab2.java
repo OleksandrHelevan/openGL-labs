@@ -1,5 +1,5 @@
-import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.*;
+import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.opengl.GL;
 
 import java.util.Objects;
 
@@ -9,7 +9,6 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class Lab2 {
-
     private long window;
     private float scale = 1.0f;
     private boolean isPaused = false;
@@ -24,9 +23,9 @@ public class Lab2 {
 
         return new float[]{
                 cos, 0, -sin, 0,
-                0,   1,  0,   0,
-                sin, 0,  cos, 0,
-                0,   0,  0,   1
+                0, 1, 0, 0,
+                sin, 0, cos, 0,
+                0, 0, 0, 1
         };
     }
 
@@ -47,7 +46,6 @@ public class Lab2 {
                 0, 0, 0, 1
         };
     }
-
 
     private final MiniCube[][][] cubes = new MiniCube[3][3][3];
 
@@ -72,12 +70,14 @@ public class Lab2 {
     private void init() {
 
         GLFWErrorCallback.createPrint(System.err).set();
-        if (!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW");
+        if (!glfwInit())
+            throw new IllegalStateException("Unable to initialize GLFW");
 
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         window = glfwCreateWindow(800, 600, "Realistic Rubik's Cube Lab2", NULL, NULL);
-        if (window == NULL) throw new RuntimeException("Failed to create GLFW window");
+        if (window == NULL)
+            throw new RuntimeException("Failed to create GLFW window");
 
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1);
@@ -131,8 +131,7 @@ public class Lab2 {
             glfwPollEvents();
         }
     }
-
-
+    
     private void drawRubik() {
         for (int x = 0; x < 3; x++) {
             for (int y = 0; y < 3; y++) {
