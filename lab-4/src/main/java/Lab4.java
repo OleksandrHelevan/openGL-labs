@@ -1,7 +1,6 @@
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL;
 
-import javax.swing.*;
 import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -13,6 +12,8 @@ public class Lab4 {
     private long window;
 
     private float light0X = -2.0f, light0Y = 2.0f, light0Z = 2.0f;
+    private boolean light1Enabled = true;
+    private boolean light2Enabled = true;
 
     private float rotX = 0.0f, rotY = 0.0f;
 
@@ -23,6 +24,10 @@ public class Lab4 {
     private float[] ambient1 = {0.1f, 0.2f, 0.1f, 1.0f};
     private float[] diffuse1 = {0.2f, 1.0f, 0.2f, 1.0f};
     private float[] specular1 = {0.5f, 1.0f, 0.5f, 1.0f};
+
+    private float[] ambient2 = {0.2f, 0.05f, 0.05f, 1.0f};
+    private float[] diffuse2 = {1.0f, 0.2f, 0.2f, 1.0f};
+    private float[] specular2 = {1.0f, 0.5f, 0.5f, 1.0f};
 
     private float[] matAmbient = {0.6f, 0.6f, 0.6f, 1.0f};
     private float[] matDiffuse = {0.6f, 0.6f, 0.6f, 1.0f};
@@ -41,7 +46,6 @@ public class Lab4 {
 
     public void run() {
         init();
-        setupGUI();
         loop();
         glfwDestroyWindow(window);
         glfwTerminate();
@@ -54,7 +58,7 @@ public class Lab4 {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-        window = glfwCreateWindow(800, 600, "Cube with Multiple Lights", NULL, NULL);
+        window = glfwCreateWindow(800, 600, "Cube with Three Lights", NULL, NULL);
         if (window == NULL) throw new RuntimeException("Failed to create GLFW window");
 
         glfwMakeContextCurrent(window);
@@ -65,37 +69,13 @@ public class Lab4 {
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);
+
         glEnable(GL_LIGHT0);
         glEnable(GL_LIGHT1);
+        glEnable(GL_LIGHT2);
 
         updateLights();
         updateMaterial();
-    }
-
-    private void setupGUI() {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Light & Material Control");
-            frame.setSize(400, 400);
-            frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-            JSlider ambientSlider = new JSlider(0, 100, 20);
-            ambientSlider.setBorder(BorderFactory.createTitledBorder("Light0 Ambient"));
-            ambientSlider.addChangeListener(e -> {
-                float value = ambientSlider.getValue() / 100f;
-                ambient0[0] = value;
-                ambient0[1] = value;
-                ambient0[2] = value * 1.5f;
-            });
-            frame.add(ambientSlider);
-
-            JSlider shininessSlider = new JSlider(0, 128, 50);
-            shininessSlider.setBorder(BorderFactory.createTitledBorder("Material Shininess"));
-            shininessSlider.addChangeListener(e -> matShininess = shininessSlider.getValue());
-            frame.add(shininessSlider);
-
-            frame.setVisible(true);
-        });
     }
 
     private void updateLights() {
@@ -104,17 +84,27 @@ public class Lab4 {
         glLightfv(GL_LIGHT0, GL_DIFFUSE, asFloatBuffer(diffuse0));
         glLightfv(GL_LIGHT0, GL_SPECULAR, asFloatBuffer(specular0));
 
+        if (light1Enabled) glEnable(GL_LIGHT1);
+        else glDisable(GL_LIGHT1);
+
         float light1X = 2.0f, light1Y = 2.0f, light1Z = 2.0f;
         glLightfv(GL_LIGHT1, GL_POSITION, asFloatBuffer(light1X, light1Y, light1Z, 1.0f));
         glLightfv(GL_LIGHT1, GL_AMBIENT, asFloatBuffer(ambient1));
         glLightfv(GL_LIGHT1, GL_DIFFUSE, asFloatBuffer(diffuse1));
         glLightfv(GL_LIGHT1, GL_SPECULAR, asFloatBuffer(specular1));
-
-        glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30f);
+        glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 45f);
         glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, asFloatBuffer(-1f, -1f, -1f, 0f));
         glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1f);
         glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.1f);
         glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.05f);
+
+        if (light2Enabled) glEnable(GL_LIGHT2);
+        else glDisable(GL_LIGHT2);
+
+        glLightfv(GL_LIGHT2, GL_POSITION, asFloatBuffer(0f, -1f, 0f, 0f)); // w=0 → directional
+        glLightfv(GL_LIGHT2, GL_AMBIENT, asFloatBuffer(ambient2));
+        glLightfv(GL_LIGHT2, GL_DIFFUSE, asFloatBuffer(diffuse2));
+        glLightfv(GL_LIGHT2, GL_SPECULAR, asFloatBuffer(specular2));
     }
 
     private void updateMaterial() {
@@ -161,6 +151,12 @@ public class Lab4 {
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) light0X += 0.1f;
         if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) light0Z += 0.1f;
         if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) light0Z -= 0.1f;
+
+        if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) light1Enabled = true;
+        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) light1Enabled = false;
+
+        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) light2Enabled = true;
+        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) light2Enabled = false;
     }
 
     private void drawCube() {

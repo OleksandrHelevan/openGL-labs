@@ -15,6 +15,7 @@ public class Lab3 {
     private long window;
     private float eyeX = 0, eyeY = 0, eyeZ = 5;
     private boolean perspective = true;
+    private boolean pPressedLastFrame = false;
 
     public void run() {
         init();
@@ -130,8 +131,6 @@ public class Lab3 {
             processInput();
         }
     }
-
-    private boolean pPressedLastFrame = false;
 
     private void processInput() {
         float speed = 0.1f;
