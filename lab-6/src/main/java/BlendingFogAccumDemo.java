@@ -23,7 +23,6 @@ public class BlendingFogAccumDemo {
 
     private boolean useBlend = true;
     private boolean useAlphaTest = true;
-    private boolean useFog = true;
     private boolean useLogicOp = false;
     private boolean useCull = true;
     private boolean depthMaskForTranslucent = false;
@@ -47,7 +46,8 @@ public class BlendingFogAccumDemo {
     private final int[] FOG_MODES = {GL_LINEAR, GL_EXP, GL_EXP2};
     private int fogIdx = 0;
 
-    private int width = 1280, height = 720;
+    private final int width = 1280;
+    private final int height = 720;
 
     public static void main(String[] args) {
         new BlendingFogAccumDemo().run();
@@ -100,7 +100,7 @@ public class BlendingFogAccumDemo {
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluPerspective(60f, (float) width / height, 0.1f, 100f);
+        gluPerspective();
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
@@ -128,8 +128,8 @@ public class BlendingFogAccumDemo {
         glFogf(GL_FOG_DENSITY, 0.12f);
         glFogf(GL_FOG_START, 5f);
         glFogf(GL_FOG_END, 40f);
-        if (useFog) glEnable(GL_FOG);
-        else glDisable(GL_FOG);
+        boolean useFog = true;
+        glEnable(GL_FOG);
     }
 
     private void loop() {
@@ -145,7 +145,7 @@ public class BlendingFogAccumDemo {
             float camR = 18f;
             float camX = (float) (Math.cos(t * 0.3) * camR);
             float camZ = (float) (Math.sin(t * 0.3) * camR);
-            gluLookAt(camX, 8.0f, camZ, 0, 3.5f, 0, 0, 1, 0);
+            gluLookAt(camX, camZ);
 
             if (useAlphaTest) {
                 glEnable(GL_ALPHA_TEST);
@@ -169,7 +169,7 @@ public class BlendingFogAccumDemo {
 
             renderOpaqueScene(t);
 
-            glDepthMask(!depthMaskForTranslucent ? false : true);
+            glDepthMask(depthMaskForTranslucent);
             renderTranslucentObjects(t);
             glDepthMask(true);
 
@@ -187,19 +187,19 @@ public class BlendingFogAccumDemo {
     private void renderOpaqueScene(double t) {
         glPushMatrix();
         glTranslatef(0, 0, 0);
-        drawCheckerFloor(40, 40, 1.0f);
+        drawCheckerFloor();
         glPopMatrix();
 
         glPushMatrix();
         glTranslatef(-5, 1.5f, -5);
         glRotatef((float) (t * 30 % 360), 0, 1, 0);
-        drawSolidCube(3f, 0.7f, 0.2f, 0.2f, 1f);
+        drawSolidCube(3f, 0.7f, 0.2f, 0.2f);
         glPopMatrix();
 
         glPushMatrix();
         glTranslatef(6, 2.5f, 4);
         glRotatef((float) (t * 50 % 360), 1, 1, 0);
-        drawSolidCube(2.5f, 0.2f, 0.6f, 0.3f, 1f);
+        drawSolidCube(2.5f, 0.2f, 0.6f, 0.3f);
         glPopMatrix();
     }
 
@@ -207,49 +207,49 @@ public class BlendingFogAccumDemo {
         glPushMatrix();
         glTranslatef(0, 3.5f, -2);
         glRotatef(90, 1, 0, 0);
-        drawAlphaQuad(6f, 6f, 0.2f, 0.6f, 0.9f, 0.35f);
+        drawAlphaQuad(0.2f, 0.9f, 0.35f);
         glPopMatrix();
 
         glPushMatrix();
         glTranslatef(0, 4.0f, 0);
         glRotatef(90, 1, 0, 0);
-        drawAlphaQuad(6f, 6f, 0.9f, 0.6f, 0.2f, 0.4f);
+        drawAlphaQuad(0.9f, 0.2f, 0.4f);
         glPopMatrix();
 
         glPushMatrix();
         glTranslatef(0, 4.5f, 2.0f);
         glRotatef(90, 1, 0, 0);
-        drawMaskedAlphaQuad(6f, 6f);
+        drawMaskedAlphaQuad();
         glPopMatrix();
 
         glPushMatrix();
         glTranslatef((float) Math.sin(t) * 4f, 2.5f, (float) Math.cos(t * 0.7) * 4f);
-        drawAlphaBall(1.8f, 0.5f, 0.8f, 0.5f, 0.35f);
+        drawAlphaBall();
         glPopMatrix();
     }
 
-    private void drawCheckerFloor(int nx, int nz, float cell) {
-        float halfX = nx * cell * 0.5f;
-        float halfZ = nz * cell * 0.5f;
+    private void drawCheckerFloor() {
+        float halfX = 40 * (float) 1.0 * 0.5f;
+        float halfZ = 40 * (float) 1.0 * 0.5f;
         glBegin(GL_QUADS);
-        for (int x = 0; x < nx; x++) {
-            for (int z = 0; z < nz; z++) {
+        for (int x = 0; x < 40; x++) {
+            for (int z = 0; z < 40; z++) {
                 boolean dark = ((x + z) & 1) == 0;
                 glColor4f(dark ? 0.28f : 0.22f, dark ? 0.3f : 0.25f, dark ? 0.34f : 0.28f, 1f);
-                float x0 = -halfX + x * cell;
-                float z0 = -halfZ + z * cell;
+                float x0 = -halfX + x * (float) 1.0;
+                float z0 = -halfZ + z * (float) 1.0;
                 glVertex3f(x0, 0, z0);
-                glVertex3f(x0 + cell, 0, z0);
-                glVertex3f(x0 + cell, 0, z0 + cell);
-                glVertex3f(x0, 0, z0 + cell);
+                glVertex3f(x0 + (float) 1.0, 0, z0);
+                glVertex3f(x0 + (float) 1.0, 0, z0 + (float) 1.0);
+                glVertex3f(x0, 0, z0 + (float) 1.0);
             }
         }
         glEnd();
     }
 
-    private void drawSolidCube(float s, float r, float g, float b, float a) {
+    private void drawSolidCube(float s, float r, float g, float b) {
         float h = s * 0.5f;
-        glColor4f(r, g, b, a);
+        glColor4f(r, g, b, (float) 1.0);
         glBegin(GL_QUADS);
         glVertex3f(+h, -h, -h); glVertex3f(+h, -h, +h); glVertex3f(+h, +h, +h); glVertex3f(+h, +h, -h);
         glVertex3f(-h, -h, +h); glVertex3f(-h, -h, -h); glVertex3f(-h, +h, -h); glVertex3f(-h, +h, +h);
@@ -260,9 +260,9 @@ public class BlendingFogAccumDemo {
         glEnd();
     }
 
-    private void drawAlphaQuad(float w, float h, float r, float g, float b, float a) {
-        float hw = w * 0.5f, hh = h * 0.5f;
-        glColor4f(r, g, b, a);
+    private void drawAlphaQuad(float r, float b, float a) {
+        float hw = (float) 6.0 * 0.5f, hh = (float) 6.0 * 0.5f;
+        glColor4f(r, (float) 0.6, b, a);
         glBegin(GL_QUADS);
         glVertex3f(-hw, 0, -hh);
         glVertex3f(+hw, 0, -hh);
@@ -271,16 +271,16 @@ public class BlendingFogAccumDemo {
         glEnd();
     }
 
-    private void drawMaskedAlphaQuad(float w, float h) {
-        float hw = w * 0.5f, hh = h * 0.5f;
+    private void drawMaskedAlphaQuad() {
+        float hw = (float) 6.0 * 0.5f, hh = (float) 6.0 * 0.5f;
         int grid = 40;
         glBegin(GL_QUADS);
         for (int i = 0; i < grid; i++) {
             for (int j = 0; j < grid; j++) {
-                float x0 = -hw + w * i / grid;
-                float x1 = -hw + w * (i + 1) / grid;
-                float z0 = -hh + h * j / grid;
-                float z1 = -hh + h * (j + 1) / grid;
+                float x0 = -hw + (float) 6.0 * i / grid;
+                float x1 = -hw + (float) 6.0 * (i + 1) / grid;
+                float z0 = -hh + (float) 6.0 * j / grid;
+                float z1 = -hh + (float) 6.0 * (j + 1) / grid;
 
                 float cx = (x0 + x1) * 0.5f / hw;
                 float cz = (z0 + z1) * 0.5f / hh;
@@ -297,8 +297,8 @@ public class BlendingFogAccumDemo {
         glEnd();
     }
 
-    private void drawAlphaBall(float radius, float r, float g, float b, float a) {
-        glColor4f(r, g, b, a);
+    private void drawAlphaBall() {
+        glColor4f((float) 0.5, (float) 0.8, (float) 0.5, (float) 0.35);
         int latBands = 24, lonBands = 32;
         for (int lat = 0; lat < latBands; lat++) {
             float theta1 = (float) (Math.PI * lat / latBands);
@@ -312,8 +312,8 @@ public class BlendingFogAccumDemo {
                 float x2 = (float) (Math.cos(phi) * Math.sin(theta2));
                 float y2 = (float) Math.cos(theta2);
                 float z2 = (float) (Math.sin(phi) * Math.sin(theta2));
-                glVertex3f(radius * x2, radius * y2, radius * z2);
-                glVertex3f(radius * x1, radius * y1, radius * z1);
+                glVertex3f((float) 1.8 * x2, (float) 1.8 * y2, (float) 1.8 * z2);
+                glVertex3f((float) 1.8 * x1, (float) 1.8 * y1, (float) 1.8 * z1);
             }
             glEnd();
         }
@@ -327,8 +327,8 @@ public class BlendingFogAccumDemo {
             case GLFW_KEY_LEFT_BRACKET -> { srcIdx = (srcIdx + 1) % SRC_FACTORS.length; glBlendFunc(SRC_FACTORS[srcIdx], DST_FACTORS[dstIdx]); }
             case GLFW_KEY_RIGHT_BRACKET -> { dstIdx = (dstIdx + 1) % DST_FACTORS.length; glBlendFunc(SRC_FACTORS[srcIdx], DST_FACTORS[dstIdx]); }
             case GLFW_KEY_T -> useAlphaTest = !useAlphaTest;
-            case GLFW_KEY_MINUS -> alphaRef = clamp(alphaRef - 0.05f, 0f, 1f);
-            case GLFW_KEY_EQUAL -> alphaRef = clamp(alphaRef + 0.05f, 0f, 1f);
+            case GLFW_KEY_MINUS -> alphaRef = clamp(alphaRef - 0.05f);
+            case GLFW_KEY_EQUAL -> alphaRef = clamp(alphaRef + 0.05f);
             case GLFW_KEY_F -> { fogIdx = (fogIdx + 1) % FOG_MODES.length; setupFog(); }
             case GLFW_KEY_L -> useLogicOp = !useLogicOp;
             case GLFW_KEY_SEMICOLON -> logicIdx = (logicIdx + 1) % LOGIC_OPS.length;
@@ -339,22 +339,20 @@ public class BlendingFogAccumDemo {
         }
     }
 
-    private static float clamp(float v, float lo, float hi) {
-        return Math.max(lo, Math.min(hi, v));
+    private static float clamp(float v) {
+        return Math.max((float) 0.0, Math.min((float) 1.0, v));
     }
 
     // ---- заміна GLU ----
-    private static void gluPerspective(float fovY, float aspect, float zNear, float zFar) {
-        float fH = (float) Math.tan(fovY / 360 * Math.PI) * zNear;
-        float fW = fH * aspect;
-        glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+    private static void gluPerspective() {
+        float fH = (float) Math.tan((float) 60.0 / 360 * Math.PI) * (float) 0.1;
+        float fW = fH * (float) 1.7777778;
+        glFrustum(-fW, fW, -fH, fH, (float) 0.1, (float) 100.0);
     }
 
-    private static void gluLookAt(float eyeX, float eyeY, float eyeZ,
-                                  float centerX, float centerY, float centerZ,
-                                  float upX, float upY, float upZ) {
-        float[] f = normalize(new float[]{centerX - eyeX, centerY - eyeY, centerZ - eyeZ});
-        float[] up = normalize(new float[]{upX, upY, upZ});
+    private static void gluLookAt(float eyeX, float eyeZ) {
+        float[] f = normalize(new float[]{(float) 0 - eyeX, (float) 3.5 - (float) 8.0, (float) 0 - eyeZ});
+        float[] up = normalize(new float[]{(float) 0, (float) 1, (float) 0});
         float[] s = cross(f, up);
         float[] u = cross(s, f);
 
@@ -366,7 +364,7 @@ public class BlendingFogAccumDemo {
         };
 
         glMultMatrixf(M);
-        glTranslatef(-eyeX, -eyeY, -eyeZ);
+        glTranslatef(-eyeX, -(float) 8.0, -eyeZ);
     }
 
     private static float[] cross(float[] a, float[] b) {

@@ -1,4 +1,3 @@
-
 import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.*;
@@ -73,7 +72,7 @@ public class TextureLab {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_2D);
 
-        System.out.println("✅ Ready. Press 1–7, ESC to exit.");
+        System.out.println("Ready. Press 1–7, ESC to exit.");
     }
 
     private void loop() {
