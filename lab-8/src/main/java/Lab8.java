@@ -17,7 +17,8 @@ public class Lab8 {
     private int winWidth = 960;
     private int winHeight = 540;
 
-    private int baseWidth = 640, baseHeight = 360;
+    private final int baseWidth = 640;
+    private final int baseHeight = 360;
     private double renderScale = 1.0; // change with Shift+Arrows
     private int imgWidth = baseWidth;
     private int imgHeight = baseHeight;
@@ -33,7 +34,6 @@ public class Lab8 {
     private boolean animate = false;
     private boolean dirty = true; // re-render needed
     private boolean preview = false; // low-quality interactive mode
-    private double previewScale = 0.6; // relative to renderScale
     private long lastInteractMs = 0;
 
     // Camera navigation
@@ -43,8 +43,7 @@ public class Lab8 {
     private boolean keyUpArr, keyDownArr, keyLeftArr, keyRightArr;
     private boolean rightMouseHeld = false;
     private double lastMouseX, lastMouseY;
-    private double moveSpeed = 0.15;
-    private double mouseSensitivity = 0.2;
+    private final double mouseSensitivity = 0.2;
 
     // Fullscreen toggle
     private boolean isFullscreen = false;
@@ -195,6 +194,8 @@ public class Lab8 {
     }
 
     private void resizeRenderBuffers() {
+        // relative to renderScale
+        double previewScale = 0.6;
         double s = renderScale * (preview ? previewScale : 1.0);
         imgWidth = Math.max(64, (int)Math.round(baseWidth * s));
         imgHeight = Math.max(36, (int)Math.round(baseHeight * s));
@@ -260,7 +261,7 @@ public class Lab8 {
                 t += 0.016;
                 for (Light l : scene.lights) {
                     l.position.x = 3.0 + Math.cos(t) * 1.5;
-                    l.position.z = 5.0 + Math.sin(t * 0.7) * 1.0;
+                    l.position.z = 5.0 + Math.sin(t * 0.7);
                 }
                 dirty = true;
             }
@@ -301,10 +302,10 @@ public class Lab8 {
     static class Scene {
         java.util.List<Shape> shapes = new java.util.ArrayList<>();
         java.util.List<Light> lights = new java.util.ArrayList<>();
-        Hit intersect(Ray r, double tMin, double tMax) {
-            Hit best = new Hit(); best.t = tMax;
+        Hit intersect(Ray r) {
+            Hit best = new Hit(); best.t = 1.0E9;
             for (Shape s : shapes) {
-                Hit h = s.intersect(r, tMin, best.t);
+                Hit h = s.intersect(r, 1.0E-4, best.t);
                 if (h.hit && h.t < best.t) best = h;
             }
             return best;
@@ -400,7 +401,7 @@ public class Lab8 {
     private Vec3 trace(Ray ray, int depth, java.util.Random rng) {
         int maxDepth = preview ? 3 : 5;
         if (depth > maxDepth) return new Vec3(0,0,0);
-        Hit hit = scene.intersect(ray, 1e-4, 1e9);
+        Hit hit = scene.intersect(ray);
         if (!hit.hit) return scene.background(ray);
 
         Vec3 p = hit.position;
@@ -432,7 +433,7 @@ public class Lab8 {
         }
 
         Vec3 V = ray.direction.neg();
-        double kr = fresnel(V, n, 1.0, m.ior);
+        double kr = fresnel(V, n, m.ior);
         Vec3 refl = new Vec3(0,0,0);
         if (m.reflectivity > 0.0 || kr > 0.0) {
             int glossySamples = m.glossyRoughness > 0.0 ? (preview ? 2 : 8) : 1;
@@ -476,7 +477,7 @@ public class Lab8 {
     // Move using WASD + QE; returns true if moved/rotated
     private boolean handleMovement() {
         boolean changed = false;
-        double step = moveSpeed;
+        double step = 0.15;
         // Direction vectors from yaw (ignore pitch for horizontal move)
         double cy = Math.cos(Math.toRadians(yaw));
         double sy = Math.sin(Math.toRadians(yaw));
@@ -511,9 +512,9 @@ public class Lab8 {
         return u.mul(local.x).add(v.mul(local.y)).add(w.mul(local.z)).normalized();
     }
 
-    private static double fresnel(Vec3 V, Vec3 N, double n1, double n2) {
+    private static double fresnel(Vec3 V, Vec3 N, double n2) {
         double cosi = clamp(N.dot(V), -1.0, 1.0);
-        double etai = n1, etat = n2;
+        double etai = 1.0, etat = n2;
         if (cosi > 0) { double tmp = etai; etai = etat; etat = tmp; }
         double sint = etai / etat * Math.sqrt(Math.max(0.0, 1 - cosi * cosi));
         if (sint >= 1.0) return 1.0;
