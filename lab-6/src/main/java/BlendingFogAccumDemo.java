@@ -7,6 +7,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13C.GL_MULTISAMPLE;
 import static org.lwjgl.system.MemoryUtil.NULL;
+
 /*
 B — вкл/викл blending; [/ ] — цикл по Src/Dst факторах.
 T — вкл/викл alpha-test; - / = — поріг glAlphaFunc.
@@ -17,6 +18,7 @@ C — вкл/викл glCullFace; D — керувати glDepthMask для пр
 R — очистити буфер-накопичувач.
 ESC — вихід.
  */
+
 public class BlendingFogAccumDemo {
 
     private long window;
@@ -77,7 +79,7 @@ public class BlendingFogAccumDemo {
 
         glfwWindowHint(GLFW_SAMPLES, 4);
 
-        window = glfwCreateWindow(width, height, "LWJGL: Blending / Alpha / LogicOp / Fog / Accum", NULL, NULL);
+        window = glfwCreateWindow(width, height, "LWJGL", NULL, NULL);
         if (window == NULL) throw new RuntimeException("Failed to create window");
 
         glfwMakeContextCurrent(window);
@@ -251,12 +253,30 @@ public class BlendingFogAccumDemo {
         float h = s * 0.5f;
         glColor4f(r, g, b, (float) 1.0);
         glBegin(GL_QUADS);
-        glVertex3f(+h, -h, -h); glVertex3f(+h, -h, +h); glVertex3f(+h, +h, +h); glVertex3f(+h, +h, -h);
-        glVertex3f(-h, -h, +h); glVertex3f(-h, -h, -h); glVertex3f(-h, +h, -h); glVertex3f(-h, +h, +h);
-        glVertex3f(-h, +h, -h); glVertex3f(+h, +h, -h); glVertex3f(+h, +h, +h); glVertex3f(-h, +h, +h);
-        glVertex3f(-h, -h, +h); glVertex3f(+h, -h, +h); glVertex3f(+h, -h, -h); glVertex3f(-h, -h, -h);
-        glVertex3f(-h, -h, +h); glVertex3f(-h, +h, +h); glVertex3f(+h, +h, +h); glVertex3f(+h, -h, +h);
-        glVertex3f(+h, -h, -h); glVertex3f(+h, +h, -h); glVertex3f(-h, +h, -h); glVertex3f(-h, -h, -h);
+        glVertex3f(+h, -h, -h);
+        glVertex3f(+h, -h, +h);
+        glVertex3f(+h, +h, +h);
+        glVertex3f(+h, +h, -h);
+        glVertex3f(-h, -h, +h);
+        glVertex3f(-h, -h, -h);
+        glVertex3f(-h, +h, -h);
+        glVertex3f(-h, +h, +h);
+        glVertex3f(-h, +h, -h);
+        glVertex3f(+h, +h, -h);
+        glVertex3f(+h, +h, +h);
+        glVertex3f(-h, +h, +h);
+        glVertex3f(-h, -h, +h);
+        glVertex3f(+h, -h, +h);
+        glVertex3f(+h, -h, -h);
+        glVertex3f(-h, -h, -h);
+        glVertex3f(-h, -h, +h);
+        glVertex3f(-h, +h, +h);
+        glVertex3f(+h, +h, +h);
+        glVertex3f(+h, -h, +h);
+        glVertex3f(+h, -h, -h);
+        glVertex3f(+h, +h, -h);
+        glVertex3f(-h, +h, -h);
+        glVertex3f(-h, -h, -h);
         glEnd();
     }
 
@@ -324,18 +344,30 @@ public class BlendingFogAccumDemo {
         switch (key) {
             case GLFW_KEY_ESCAPE -> glfwSetWindowShouldClose(win, true);
             case GLFW_KEY_B -> useBlend = !useBlend;
-            case GLFW_KEY_LEFT_BRACKET -> { srcIdx = (srcIdx + 1) % SRC_FACTORS.length; glBlendFunc(SRC_FACTORS[srcIdx], DST_FACTORS[dstIdx]); }
-            case GLFW_KEY_RIGHT_BRACKET -> { dstIdx = (dstIdx + 1) % DST_FACTORS.length; glBlendFunc(SRC_FACTORS[srcIdx], DST_FACTORS[dstIdx]); }
+            case GLFW_KEY_LEFT_BRACKET -> {
+                srcIdx = (srcIdx + 1) % SRC_FACTORS.length;
+                glBlendFunc(SRC_FACTORS[srcIdx], DST_FACTORS[dstIdx]);
+            }
+            case GLFW_KEY_RIGHT_BRACKET -> {
+                dstIdx = (dstIdx + 1) % DST_FACTORS.length;
+                glBlendFunc(SRC_FACTORS[srcIdx], DST_FACTORS[dstIdx]);
+            }
             case GLFW_KEY_T -> useAlphaTest = !useAlphaTest;
             case GLFW_KEY_MINUS -> alphaRef = clamp(alphaRef - 0.05f);
             case GLFW_KEY_EQUAL -> alphaRef = clamp(alphaRef + 0.05f);
-            case GLFW_KEY_F -> { fogIdx = (fogIdx + 1) % FOG_MODES.length; setupFog(); }
+            case GLFW_KEY_F -> {
+                fogIdx = (fogIdx + 1) % FOG_MODES.length;
+                setupFog();
+            }
             case GLFW_KEY_L -> useLogicOp = !useLogicOp;
             case GLFW_KEY_SEMICOLON -> logicIdx = (logicIdx + 1) % LOGIC_OPS.length;
             case GLFW_KEY_C -> useCull = !useCull;
             case GLFW_KEY_D -> depthMaskForTranslucent = !depthMaskForTranslucent;
             case GLFW_KEY_M -> motionBlur = !motionBlur;
-            case GLFW_KEY_R -> { glClearAccum(0f, 0f, 0f, 0f); glClear(GL_ACCUM_BUFFER_BIT); }
+            case GLFW_KEY_R -> {
+                glClearAccum(0f, 0f, 0f, 0f);
+                glClear(GL_ACCUM_BUFFER_BIT);
+            }
         }
     }
 
@@ -343,7 +375,6 @@ public class BlendingFogAccumDemo {
         return Math.max((float) 0.0, Math.min((float) 1.0, v));
     }
 
-    // ---- заміна GLU ----
     private static void gluPerspective() {
         float fH = (float) Math.tan((float) 60.0 / 360 * Math.PI) * (float) 0.1;
         float fW = fH * (float) 1.7777778;

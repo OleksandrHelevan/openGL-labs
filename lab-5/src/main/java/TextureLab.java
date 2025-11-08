@@ -65,8 +65,8 @@ public class TextureLab {
         });
 
         // --- Завантаження звичайних текстур ---
-        texture1ID = loadTexture("texture1.png");
-        texture2ID = loadTexture("texture2.png");
+        texture1ID = loadTexture("purple.jpg");
+        texture2ID = loadTexture("texture1.png");
         loadRawImageData();
 
         glEnable(GL_DEPTH_TEST);
@@ -204,7 +204,7 @@ public class TextureLab {
                     GL_RGBA, GL_UNSIGNED_BYTE, img);
             glGenerateMipmap(GL_TEXTURE_2D);
             STBImage.stbi_image_free(img);
-            System.out.println("✅ Loaded texture: " + file);
+            System.out.println("Loaded texture: " + file);
         }
         return id;
     }
@@ -212,7 +212,7 @@ public class TextureLab {
     private void loadRawImageData() {
         try (MemoryStack stack = stackPush()) {
             IntBuffer w = stack.mallocInt(1), h = stack.mallocInt(1), c = stack.mallocInt(1);
-            textureBuffer = STBImage.stbi_load(getResourcePath("texture1.png"), w, h, c, 4);
+            textureBuffer = STBImage.stbi_load(getResourcePath("back.jpg"), w, h, c, 4);
             if (textureBuffer == null)
                 throw new RuntimeException("Failed raw load " + "texture1.png" + ": " + STBImage.stbi_failure_reason());
             textureWidth = w.get(0);
